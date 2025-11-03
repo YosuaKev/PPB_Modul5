@@ -9,17 +9,21 @@ import { ArrowLeft, Heart, Clock, Users, ChefHat, Star, Send, Edit, Trash2 } fro
 import recipeService from '../../services/recipeService';
 import ConfirmModal from '../modals/ConfirmModal';
 import FavoriteButton from '../common/FavoriteButton';
+import ShareRecipeButton from '../common/ShareRecipeButton'; // ✅ IMPORT SHARE BUTTON
 import userService from '../../services/userService';
+
 export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'makanan' }) {
     const { recipe, loading: recipeLoading, error: recipeError } = useRecipe(recipeId);
     const { reviews, loading: reviewsLoading, refetch: refetchReviews } = useReviews(recipeId);
     const { createReview, loading: createLoading } = useCreateReview();
     const { isFavorited, loading: favLoading, toggleFavorite } = useIsFavorited(recipeId);
+    
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
     const categoryColors = {
         makanan: {
             primary: 'blue',
@@ -40,7 +44,9 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             ring: 'ring-green-500'
         }
     };
+
     const colors = categoryColors[category] || categoryColors.makanan;
+
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         // Get username from user profile
@@ -50,6 +56,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             rating,
             comment: comment.trim(),
         };
+
         const success = await createReview(recipeId, reviewData);
         if (success) {
             setComment('');
@@ -58,9 +65,11 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             refetchReviews();
         }
     };
+
     const handleToggleFavorite = async () => {
         await toggleFavorite();
     };
+
     const handleDeleteRecipe = async () => {
         try {
             setDeleting(true);
@@ -81,6 +90,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             setDeleting(false);
         }
     };
+
     if (recipeLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -91,6 +101,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             </div>
         );
     }
+
     if (recipeError) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
@@ -109,6 +120,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             </div>
         );
     }
+
     if (!recipe) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
@@ -124,6 +136,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
             </div>
         );
     }
+
     return (
         <div className={`min-h-screen bg-gradient-to-br ${colors.gradient} pb-20 md:pb-8`}>
             {/* Delete Confirmation Modal */}
@@ -138,6 +151,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                 variant="danger"
                 isLoading={deleting}
             />
+
             {/* Header */}
             <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -148,32 +162,43 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                         <ArrowLeft className="w-5 h-5" />
                         <span className="font-medium">Kembali</span>
                     </button>
-                    {/* Action Buttons */}
-                    {onEdit && (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => {
-                                    console.log(' Edit button clicked in RecipeDetail');
-                                    console.log(' Recipe ID:', recipeId);
-                                    console.log(' onEdit function:', onEdit);
-                                    onEdit(recipeId);
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <Edit className="w-4 h-4" />
-                                <span className="hidden md:inline">Edit</span>
-                            </button>
-                            <button
-                                onClick={() => setShowDeleteModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                <span className="hidden md:inline">Hapus</span>
-                            </button>
-                        </div>
-                    )}
+
+                    {/* ✅ ACTION BUTTONS - DENGAN SHARE BUTTON */}
+                    <div className="flex gap-2">
+                        {/* Share Button */}
+                        <ShareRecipeButton 
+                            recipe={recipe} 
+                            size="md" 
+                        />
+
+                        {/* Edit & Delete Buttons */}
+                        {onEdit && (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        console.log('✅ Edit button clicked in RecipeDetail');
+                                        console.log('📝 Recipe ID:', recipeId);
+                                        console.log('🔧 onEdit function:', onEdit);
+                                        onEdit(recipeId);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                    <span className="hidden md:inline">Edit</span>
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span className="hidden md:inline">Hapus</span>
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
+
             <main className="max-w-5xl mx-auto px-4 py-8">
                 {/* Recipe Header */}
                 <div className="bg-white/60 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/40 mb-8">
@@ -185,10 +210,12 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        
                         {/* Favorite Button - Use component */}
                         <div className="absolute top-4 right-4 z-10">
                             <FavoriteButton recipeId={recipeId} size="lg" />
                         </div>
+
                         {/* Category Badge */}
                         <div className="absolute bottom-4 left-4">
                             <span className={`${colors.text} ${colors.bg} px-4 py-2 rounded-full text-sm font-semibold`}>
@@ -196,6 +223,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                             </span>
                         </div>
                     </div>
+
                     {/* Recipe Info */}
                     <div className="p-6 md:p-8">
                         <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
@@ -206,12 +234,13 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                 {recipe.description}
                             </p>
                         )}
+
                         {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-white/70 backdrop-blur p-4 rounded-xl border border-white/60 text-center">
                                 <Clock className={`w-6 h-6 mx-auto mb-2 text-${colors.primary}-600`} />
                                 <p className="text-xs text-slate-500 mb-1">Persiapan</p>
-                                <p className="font-semibold text-slate-700">{recipe.prep_time}</p>
+                                <p className="font-semibold text-slate-700">{recipe.prep_time} menit</p>
                             </div>
                             <div className="bg-white/70 backdrop-blur p-4 rounded-xl border border-white/60 text-center">
                                 <Clock className={`w-6 h-6 mx-auto mb-2 text-${colors.primary}-600`} />
@@ -231,6 +260,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                 </p>
                             </div>
                         </div>
+
                         {/* Rating */}
                         {recipe.average_rating > 0 && (
                             <div className="mt-6 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -238,10 +268,11 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                             key={star}
-                                            className={`w-5 h-5 ${star <= Math.round(recipe.average_rating)
+                                            className={`w-5 h-5 ${
+                                                star <= Math.round(recipe.average_rating)
                                                     ? 'text-amber-500 fill-current'
                                                     : 'text-slate-300'
-                                                }`}
+                                            }`}
                                         />
                                     ))}
                                 </div>
@@ -257,13 +288,14 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                         )}
                     </div>
                 </div>
+
                 {/* Ingredients & Steps */}
                 <div className="grid md:grid-cols-2 gap-8 mb-8">
                     {/* Ingredients */}
                     <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-xl border border-white/40">
                         <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full bg-${colors.primary}-100 flex items-center justify-center`}>
-                                <span className={`text-${colors.primary}-600 text-xl`}> </span>
+                                <span className={`text-${colors.primary}-600 text-xl`}>🥘</span>
                             </div>
                             Bahan-bahan
                         </h2>
@@ -282,11 +314,12 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                             ))}
                         </ul>
                     </div>
+
                     {/* Steps */}
                     <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-xl border border-white/40">
                         <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full bg-${colors.primary}-100 flex items-center justify-center`}>
-                                <span className={`text-${colors.primary}-600 text-xl`}> </span>
+                                <span className={`text-${colors.primary}-600 text-xl`}>📝</span>
                             </div>
                             Langkah-langkah
                         </h2>
@@ -307,6 +340,7 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                         </ol>
                     </div>
                 </div>
+
                 {/* Reviews Section */}
                 <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-xl border border-white/40">
                     <div className="flex items-center justify-between mb-6">
@@ -320,9 +354,10 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                             {showReviewForm ? 'Batal' : 'Tulis Ulasan'}
                         </button>
                     </div>
+
                     {/* Review Form */}
                     {showReviewForm && (
-                        <form onSubmit={handleSubmitReview} className="mb-8 bg-white/70 rounded-2xl p-6 border border-white/60">
+                        <div className="mb-8 bg-white/70 rounded-2xl p-6 border border-white/60">
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Rating
@@ -336,10 +371,11 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                             className="focus:outline-none"
                                         >
                                             <Star
-                                                className={`w-8 h-8 ${star <= rating
+                                                className={`w-8 h-8 ${
+                                                    star <= rating
                                                         ? 'text-amber-500 fill-current'
                                                         : 'text-slate-300'
-                                                    } hover:scale-110 transition-transform`}
+                                                } hover:scale-110 transition-transform`}
                                             />
                                         </button>
                                     ))}
@@ -358,15 +394,16 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                 />
                             </div>
                             <button
-                                type="submit"
+                                onClick={handleSubmitReview}
                                 disabled={createLoading || !comment.trim()}
                                 className={`w-full md:w-auto px-6 py-3 bg-${colors.primary}-600 text-white rounded-xl hover:bg-${colors.primary}-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
                             >
                                 <Send className="w-4 h-4" />
                                 {createLoading ? 'Mengirim...' : 'Kirim Ulasan'}
                             </button>
-                        </form>
+                        </div>
                     )}
+
                     {/* Reviews List */}
                     <div className="space-y-4">
                         {reviewsLoading ? (
@@ -388,10 +425,11 @@ export default function RecipeDetail({ recipeId, onBack, onEdit, category = 'mak
                                                 {[1, 2, 3, 4, 5].map((star) => (
                                                     <Star
                                                         key={star}
-                                                        className={`w-4 h-4 ${star <= review.rating
+                                                        className={`w-4 h-4 ${
+                                                            star <= review.rating
                                                                 ? 'text-amber-500 fill-current'
                                                                 : 'text-slate-300'
-                                                            }`}
+                                                        }`}
                                                     />
                                                 ))}
                                             </div>
