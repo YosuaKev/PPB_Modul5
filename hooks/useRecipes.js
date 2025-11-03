@@ -56,11 +56,14 @@ export function useRecipe(id) {
         try {
             setLoading(true);
             setError(null);
-            const response = await recipeService.getRecipeById(id);
-            if (response.success) {
+            // use cache-aware service call
+            const response = await recipeService.getRecipeById(id, { useCache: true });
+            if (response && response.success) {
+                setRecipe(response.data);
+            } else if (response && response.data) {
                 setRecipe(response.data);
             } else {
-                setError(response.message || 'Failed to fetch recipe');
+                setError((response && response.message) || 'Failed to fetch recipe');
             }
         } catch (err) {
             setError(err.message || 'An error occurred while fetching recipe');

@@ -1,6 +1,7 @@
 // src/components/common/ShareRecipeButton.jsx
 import { useState } from 'react';
 import { Share2, Link2, Facebook, Twitter, MessageCircle, Mail, Check, X } from 'lucide-react';
+import LazyImage from './LazyImage';
 
 export default function ShareRecipeButton({ recipe, size = 'md', variant = 'button' }) {
   const [showShareModal, setShowShareModal] = useState(false);
@@ -129,10 +130,10 @@ export default function ShareRecipeButton({ recipe, size = 'md', variant = 'butt
               {/* Recipe Preview */}
               <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div className="flex gap-4">
-                  <img
+                  <LazyImage
                     src={recipe.image_url}
                     alt={recipe.name}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-lg overflow-hidden"
                   />
                   <div className="flex-1">
                     <h4 className="font-semibold text-slate-800 mb-1">{recipe.name}</h4>

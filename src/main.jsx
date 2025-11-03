@@ -1,5 +1,5 @@
 // src/main.jsx
-import { StrictMode, useState } from 'react'
+import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import SplashScreen from './pages/SplashScreen';
 import HomePage from './pages/HomePage';
@@ -13,6 +13,7 @@ import DesktopNavbar from './components/navbar/DesktopNavbar';
 import MobileNavbar from './components/navbar/MobileNavbar';
 import './index.css'
 import PWABadge from './PWABadge';
+import CacheInspector from './components/common/CacheInspector';
 function AppRoot() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentPage, setCurrentPage] = useState('home');
@@ -20,6 +21,25 @@ function AppRoot() {
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('makanan');
   const [editingRecipeId, setEditingRecipeId] = useState(null);
+  
+  // If app is opened with a shared recipe link like `/?recipe=123`,
+  // navigate directly to the detail view on initial load.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sharedRecipe = params.get('recipe');
+      if (sharedRecipe) {
+        setSelectedRecipeId(sharedRecipe);
+        setMode('detail');
+        // Remove the query param so reopening doesn't repeatedly force navigation
+        const url = new URL(window.location.href);
+        url.searchParams.delete('recipe');
+        window.history.replaceState({}, '', url.pathname + url.search);
+      }
+    } catch (err) {
+      console.error('Error processing shared recipe param:', err);
+    }
+  }, []);
   const handleSplashComplete = () => {
     setShowSplash(false);
   };
@@ -56,7 +76,7 @@ function AppRoot() {
       setCurrentPage(newRecipe.category);
     }
   };
-  const handleEditSuccess = (updatedRecipe) => {
+  const handleEditSuccess = () => {
     alert('Resep berhasil diperbarui!');
     setMode('list');
   };
@@ -130,6 +150,8 @@ function AppRoot() {
         {renderCurrentPage()}
       </main>
       <PWABadge />
+      {/* Dev-only cache inspector */}
+      {import.meta.env.DEV && <CacheInspector />}
     </div>
   );
 }
